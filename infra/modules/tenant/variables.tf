@@ -20,3 +20,8 @@ variable "database" {
   type        = string
   default     = "postgresql"
 }
+variable "docker_image" {
+  description = "Image Docker de l'application du tenant"
+  type        = string
+  default     = "nginx:latest"
+}

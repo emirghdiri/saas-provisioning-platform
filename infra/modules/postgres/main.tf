@@ -9,7 +9,7 @@ resource "kubernetes_secret" "postgres" {
   data = {
     POSTGRES_USER     = "admin"
     POSTGRES_PASSWORD = "CHANGE_ME"
-    POSTGRES_DB       = "saas"
+    POSTGRES_DB       = var.database
   }
 }
 

@@ -1,5 +1,4 @@
 module "platform_namespace" {
-
   source = "../../modules/namespace"
 
   namespace_name = "platform"
@@ -8,8 +7,9 @@ module "platform_namespace" {
     environment = "local"
     managed-by  = "terraform"
   }
-
 }
+
+
 module "platform_deployment" {
   source = "../../modules/deployment"
 
@@ -18,6 +18,8 @@ module "platform_deployment" {
   image     = "nginx:latest"
   replicas  = 2
 }
+
+
 module "platform_service" {
   source = "../../modules/service"
 
@@ -30,6 +32,8 @@ module "platform_service" {
     app = "platform-backend"
   }
 }
+
+
 module "platform_config" {
   source = "../../modules/configmap"
 
@@ -41,6 +45,8 @@ module "platform_config" {
     ENV      = "local"
   }
 }
+
+
 module "platform_postgres" {
   source = "../../modules/postgres"
 
@@ -48,6 +54,8 @@ module "platform_postgres" {
   namespace = "platform"
   storage   = "1Gi"
 }
+
+
 module "platform_ingress" {
   source = "../../modules/ingress"
 
@@ -56,11 +64,15 @@ module "platform_ingress" {
   service_name = "platform-backend"
   service_port = 80
 }
-module "tenant_acme" {
+
+
+module "tenant" {
   source = "../../modules/tenant"
 
-  client_name = "acme"
-  replicas    = 2
-  storage     = "2Gi"
-  database    = "postgresql"
+  client_name  = var.client_name
+  replicas     = var.replicas
+  storage      = var.storage
+  database     = var.database
+  docker_image = var.docker_image
+
 }

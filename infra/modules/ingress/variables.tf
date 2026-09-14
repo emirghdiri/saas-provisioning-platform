@@ -13,3 +13,8 @@ variable "service_name" {
 variable "service_port" {
   type = number
 }
+
+variable "client_name" {
+  type    = string
+  default = null
+}

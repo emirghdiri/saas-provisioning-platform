@@ -1,4 +1,4 @@
-# Terraform
+#Terraform
 .terraform/
 *.tfstate
 *.tfstate.*
@@ -13,3 +13,27 @@ crash.*.log
 .DS_Store
 .vscode/
 .idea/
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+backend/venv/
+
+# Node
+node_modules/
+dist/
+
+# Local backups / temporary files
+*.backup
+*.bak
+*_backup/
+plan.txt
+
+# Environment files
+.env
+.env.*
+!.env.examplex
+# Generated tenant Terraform environments
+infra/tenants/

@@ -19,3 +19,8 @@ variable "storage" {
   type        = string
   default     = "1Gi"
 }
+variable "database" {
+  description = "Nom de la base de données"
+  type        = string
+  default     = "saas"
+}

@@ -8,6 +8,8 @@ resource "kubernetes_ingress_v1" "this" {
     ingress_class_name = "traefik"
 
     rule {
+      host = var.client_name != null ? "${var.client_name}.localhost" : null
+
       http {
         path {
           path      = "/"
