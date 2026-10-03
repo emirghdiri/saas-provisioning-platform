@@ -1,0 +1,71 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-scan-push:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set image names
+        id: names
+        run: |
+          echo "prefix=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Build backend image
+        run: |
+          docker build \
+            -t ${{ steps.names.outputs.prefix }}/backend:${{ github.event.workflow_run.head_sha }} \
+            -t ${{ steps.names.outputs.prefix }}/backend:latest \
+            ./saas-platform/backend
+
+      - name: Build frontend image
+        run: |
+          docker build \
+            -t ${{ steps.names.outputs.prefix }}/frontend:${{ github.event.workflow_run.head_sha }} \
+            -t ${{ steps.names.outputs.prefix }}/frontend:latest \
+            ./saas-platform/frontend
+
+      - name: Scan backend image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/backend:${{ github.event.workflow_run.head_sha }}
+          scan-type: image
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Scan frontend image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository }}/frontend:${{ github.event.workflow_run.head_sha }}
+          scan-type: image
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Login to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io \
+            -u "${{ github.actor }}" --password-stdin
+
+      - name: Push images
+        run: |
+          docker push ${{ steps.names.outputs.prefix }}/backend:${{ github.event.workflow_run.head_sha }}
+          docker push ${{ steps.names.outputs.prefix }}/backend:latest
+          docker push ${{ steps.names.outputs.prefix }}/frontend:${{ github.event.workflow_run.head_sha }}
+          docker push ${{ steps.names.outputs.prefix }}/frontend:latest
